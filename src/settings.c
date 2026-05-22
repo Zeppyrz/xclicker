@@ -64,7 +64,7 @@ void get_hotkeys_handler()
         return;
     }
 
-    mask_config(display, MASK_KEYBOARD_PRESS);
+    mask_config(display, MASK_KEYBOARD_PRESS | MASK_MOUSE_PRESS);
 
     gboolean hasPreKey = FALSE;
     while (1)
@@ -78,32 +78,24 @@ void get_hotkeys_handler()
         if (keyState.evtype == -1 || state == 0)
             continue;
 
-        // Numlock & caps lock is incredibly buggy and causes memory leaks, pointer errors, free errors...
-        if (state == XKeysymToKeycode(display, XK_Num_Lock) || state == XKeysymToKeycode(display, XK_Caps_Lock))
-            continue;
-
-        // If prekey, ex shift, ctrl
-        if (state == XKeysymToKeycode(display, XK_Shift_L) || state == XKeysymToKeycode(display, XK_Shift_R) || state == XKeysymToKeycode(display, XK_Alt_L) || state == XKeysymToKeycode(display, XK_Alt_R) || state == XKeysymToKeycode(display, XK_Escape) || state == XKeysymToKeycode(display, XK_Control_L) || state == XKeysymToKeycode(display, XK_Control_R) || state == XKeysymToKeycode(display, XK_ISO_Level3_Shift) || state == XKeysymToKeycode(display, XK_Super_L) || state == XKeysymToKeycode(display, XK_Super_R))
+        if (keyState.evtype == XI_ButtonPress)
         {
-            hasPreKey = TRUE;
-            config->button1 = state;
-            const char *key_str = keycode_to_string(display, state);
-            if (!key_str)
-                key_str = "?";
-            const char *plus = " + ";
-            char *text = malloc(1 + strlen(key_str) + strlen(plus));
-            sprintf(text, "%s%s", key_str, plus);
+            // Mouse button event
+            if (!is_valid_mouse_button(state))
+                continue;
 
-            struct set_buttons_entry_struct *user_data = g_malloc0(sizeof(struct set_buttons_entry_struct));
-            user_data->text = text;
-            g_idle_add(set_buttons_entry_text, user_data);
-        }
-        else
-        {
             config->button2 = state;
-            const char *key_str = keycode_to_string(display, state);
+            config->button2_is_mouse = TRUE;
+            if (!hasPreKey)
+            {
+                config->button1 = -1;
+                config->button1_is_mouse = FALSE;
+            }
+
+            const char *key_str = mouse_button_to_string(state);
             if (!key_str)
                 key_str = "?";
+
             struct set_buttons_entry_struct *user_data = g_malloc0(sizeof(struct set_buttons_entry_struct));
 
             if (hasPreKey == TRUE)
@@ -116,6 +108,7 @@ void get_hotkeys_handler()
             else
             {
                 config->button1 = -1;
+                config->button1_is_mouse = FALSE;
                 char *text = (char *)malloc(1 + strlen(key_str));
                 strcpy(text, key_str);
                 user_data->text = text;
@@ -124,6 +117,59 @@ void get_hotkeys_handler()
             g_idle_add(set_buttons_entry_text, user_data);
             break;
         }
+        else if (keyState.evtype == XI_KeyPress)
+        {
+            // Keyboard event
+            // Numlock & caps lock is incredibly buggy and causes memory leaks, pointer errors, free errors...
+            if (state == XKeysymToKeycode(display, XK_Num_Lock) || state == XKeysymToKeycode(display, XK_Caps_Lock))
+                continue;
+
+            // If prekey, ex shift, ctrl
+            if (state == XKeysymToKeycode(display, XK_Shift_L) || state == XKeysymToKeycode(display, XK_Shift_R) || state == XKeysymToKeycode(display, XK_Alt_L) || state == XKeysymToKeycode(display, XK_Alt_R) || state == XKeysymToKeycode(display, XK_Escape) || state == XKeysymToKeycode(display, XK_Control_L) || state == XKeysymToKeycode(display, XK_Control_R) || state == XKeysymToKeycode(display, XK_ISO_Level3_Shift) || state == XKeysymToKeycode(display, XK_Super_L) || state == XKeysymToKeycode(display, XK_Super_R))
+            {
+                hasPreKey = TRUE;
+                config->button1 = state;
+                config->button1_is_mouse = FALSE;
+                const char *key_str = keycode_to_string(display, state);
+                if (!key_str)
+                    key_str = "?";
+                const char *plus = " + ";
+                char *text = malloc(1 + strlen(key_str) + strlen(plus));
+                sprintf(text, "%s%s", key_str, plus);
+
+                struct set_buttons_entry_struct *user_data = g_malloc0(sizeof(struct set_buttons_entry_struct));
+                user_data->text = text;
+                g_idle_add(set_buttons_entry_text, user_data);
+            }
+            else
+            {
+                config->button2 = state;
+                config->button2_is_mouse = FALSE;
+                const char *key_str = keycode_to_string(display, state);
+                if (!key_str)
+                    key_str = "?";
+                struct set_buttons_entry_struct *user_data = g_malloc0(sizeof(struct set_buttons_entry_struct));
+
+                if (hasPreKey == TRUE)
+                {
+                    const char *buttons_entry_text = gtk_entry_get_text(GTK_ENTRY(items.buttons_entry));
+                    char *text = malloc(1 + strlen(buttons_entry_text) + strlen(key_str));
+                    sprintf(text, "%s%s", buttons_entry_text, key_str);
+                    user_data->text = text;
+                }
+                else
+                {
+                    config->button1 = -1;
+                    config->button1_is_mouse = FALSE;
+                    char *text = (char *)malloc(1 + strlen(key_str));
+                    strcpy(text, key_str);
+                    user_data->text = text;
+                }
+                // Text is freed in the set_buttons_entry_text function
+                g_idle_add(set_buttons_entry_text, user_data);
+                break;
+            }
+        }
     }
     XCloseDisplay(display);
     g_idle_add(enable_start_button, NULL);
@@ -131,6 +177,8 @@ void get_hotkeys_handler()
 
     g_key_file_set_integer(config_gfile, CFGK_BUTTON_1, config->button1);
     g_key_file_set_integer(config_gfile, CFGK_BUTTON_2, config->button2);
+    g_key_file_set_boolean(config_gfile, CFGK_BUTTON1_IS_MOUSE, config->button1_is_mouse);
+    g_key_file_set_boolean(config_gfile, CFGK_BUTTON2_IS_MOUSE, config->button2_is_mouse);
 
     g_key_file_save_to_file(config_gfile, configpath, NULL);
     isChoosingHotkey = FALSE;
@@ -256,7 +304,9 @@ void settings_dialog_new()
     Display *display = get_display();
     if (display)
     {
-        const char *button_2_key = keycode_to_string(display, config->button2);
+        const char *button_2_key = config->button2_is_mouse
+            ? mouse_button_to_string(config->button2)
+            : keycode_to_string(display, config->button2);
         if (!button_2_key)
             button_2_key = "?";
         const char *sep = " + ";
@@ -264,7 +314,9 @@ void settings_dialog_new()
 
         if (config->button1 != -1)
         {
-            const char *button_1_key = keycode_to_string(display, config->button1);
+            const char *button_1_key = config->button1_is_mouse
+                ? mouse_button_to_string(config->button1)
+                : keycode_to_string(display, config->button1);
             if (!button_1_key)
                 button_1_key = "?";
             hotkeys = malloc(1 + strlen(sep) + strlen(button_2_key) + strlen(button_1_key));

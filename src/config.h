@@ -13,6 +13,8 @@ struct Config
 	/// options
 	int button1;
 	int button2;
+	gboolean button1_is_mouse;
+	gboolean button2_is_mouse;
 	gboolean safe_mode_enabled;
 	gboolean use_xevent;
 	const char *language;
@@ -53,6 +55,8 @@ extern struct Config *config;
 // config keys
 #define CFGK_BUTTON_1 CONFIG_CATEGORY_OPTIONS, "BUTTON1"
 #define CFGK_BUTTON_2 CONFIG_CATEGORY_OPTIONS, "BUTTON2"
+#define CFGK_BUTTON1_IS_MOUSE CONFIG_CATEGORY_OPTIONS, "BUTTON1_IS_MOUSE"
+#define CFGK_BUTTON2_IS_MOUSE CONFIG_CATEGORY_OPTIONS, "BUTTON2_IS_MOUSE"
 #define CFGK_USE_XEVENT CONFIG_CATEGORY_OPTIONS, "USE_XEVENT"
 #define CFGK_SAFEMODE CONFIG_CATEGORY_OPTIONS, "SAFEMODE"
 #define CFGK_LANGUAGE CONFIG_CATEGORY_OPTIONS, "LANGUAGE"

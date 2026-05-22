@@ -584,19 +584,19 @@ void mouse_button_entry_changed()
 
 void toggle_clicking(int evtype)
 {
+	gboolean is_press = (evtype == KeyPress) || (evtype == XI_ButtonPress);
+
 	if (strcmp(config->hotkey, "Normal"))
 	{
-		if (evtype == KeyPress)
-		{
+		// Hold mode: hold to start, release to stop
+		if (is_press)
 			start_clicked();
-		}
 		else
-		{
 			stop_clicked();
-		}
 	}
-	else if (evtype == KeyPress)
+	else if (is_press)
 	{
+		// Normal mode: press to toggle
 		if (isClicking)
 			stop_clicked();
 		else
@@ -611,7 +611,10 @@ void toggle_clicking(int evtype)
 void get_start_stop_key_handler()
 {
 	Display *display = get_display();
-	mask_config(display, MASK_KEYBOARD_PRESS | MASK_KEYBOARD_RELEASE);
+	if (!display)
+		return;
+
+	mask_config(display, MASK_KEYBOARD_PRESS | MASK_KEYBOARD_RELEASE | MASK_MOUSE_PRESS | MASK_MOUSE_RELEASE);
 
 	gboolean isHolding1 = FALSE;
 	gboolean isHolding2 = FALSE;
@@ -623,7 +626,30 @@ void get_start_stop_key_handler()
 		if (isChoosingHotkey == TRUE)
 			continue;
 
-		if (keyState.button == config->button1 || keyState.button == config->button2)
+		if (keyState.evtype == -1 || keyState.button == 0)
+			continue;
+
+		gboolean match1 = FALSE;
+		gboolean match2 = FALSE;
+
+		if (config->button1 != -1)
+		{
+			if (config->button1_is_mouse)
+				match1 = (keyState.evtype == XI_ButtonPress || keyState.evtype == XI_ButtonRelease)
+				         && keyState.button == config->button1;
+			else
+				match1 = (keyState.evtype == XI_KeyPress || keyState.evtype == XI_KeyRelease)
+				         && keyState.button == config->button1;
+		}
+
+		if (config->button2_is_mouse)
+			match2 = (keyState.evtype == XI_ButtonPress || keyState.evtype == XI_ButtonRelease)
+			         && keyState.button == config->button2;
+		else
+			match2 = (keyState.evtype == XI_KeyPress || keyState.evtype == XI_KeyRelease)
+			         && keyState.button == config->button2;
+
+		if (match1 || match2)
 		{
 			// Two buttons
 			if (config->button1 != -1)
@@ -639,8 +665,8 @@ void get_start_stop_key_handler()
 				toggle_clicking(keyState.evtype);
 			}
 
-			isHolding1 = keyState.button == config->button1 && keyState.evtype == KeyPress;
-			isHolding2 = keyState.button == config->button2 && keyState.evtype == KeyPress;
+			isHolding1 = match1 && (keyState.evtype == KeyPress || keyState.evtype == XI_ButtonPress);
+			isHolding2 = match2 && (keyState.evtype == KeyPress || keyState.evtype == XI_ButtonPress);
 		}
 	}
 
@@ -657,7 +683,9 @@ void set_start_stop_button_hotkey_text()
 	const char *stop_text_1 = _("Stop");
 
 	// Button2 should always be defined
-	const char *button_2_key = keycode_to_string(display, config->button2);
+	const char *button_2_key = config->button2_is_mouse
+		? mouse_button_to_string(config->button2)
+		: keycode_to_string(display, config->button2);
 	if (!button_2_key)
 		button_2_key = "?";
 
@@ -667,7 +695,9 @@ void set_start_stop_button_hotkey_text()
 	// If 2 keys
 	if (config->button1 != -1)
 	{
-		const char *button_1_key = keycode_to_string(display, config->button1);
+		const char *button_1_key = config->button1_is_mouse
+			? mouse_button_to_string(config->button1)
+			: keycode_to_string(display, config->button1);
 		if (!button_1_key)
 			button_1_key = "?";
 		start_text = malloc(1 + strlen(start_text_1) + strlen(button_1_key) + strlen(button_2_key) + 4);

@@ -3,12 +3,14 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/XInput2.h>
 
 enum MaskFlags
 {
     MASK_KEYBOARD_PRESS = 1 << 0,
     MASK_KEYBOARD_RELEASE = 1 << 1,
-    MASK_MOUSE_PRESS = 1 << 2
+    MASK_MOUSE_PRESS = 1 << 2,
+    MASK_MOUSE_RELEASE = 1 << 3
 };
 
 enum ClickModes
@@ -87,6 +89,18 @@ int click(Display *display, int button, int mode, int sleep);
  * which is not always just one character (ex shift).
  */
 char *keycode_to_string(Display *display, int keycode);
+
+/**
+ * Converts a mouse button number to a human-readable string.
+ * Returns NULL for invalid buttons.
+ */
+const char *mouse_button_to_string(int button);
+
+/**
+ * Checks if a mouse button is valid for hotkey binding.
+ * Only side buttons (button >= 8) are allowed.
+ */
+gboolean is_valid_mouse_button(int button);
 
 /**
  * Gets a new display.

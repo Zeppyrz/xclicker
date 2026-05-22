@@ -78,6 +78,9 @@ void load_start_stop_keybinds(struct Config *config)
     config->button1 = -1;
     config->button2 = -1;
 
+    config->button1_is_mouse = g_key_file_get_boolean(config_gfile, CFGK_BUTTON1_IS_MOUSE, NULL);
+    config->button2_is_mouse = g_key_file_get_boolean(config_gfile, CFGK_BUTTON2_IS_MOUSE, NULL);
+
     if (display)
     {
         config->button2 = XKeysymToKeycode(display, XK_F8);

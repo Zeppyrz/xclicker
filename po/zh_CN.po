@@ -210,3 +210,15 @@ msgstr "语言"
 #: src/resources/ui/settings-dialog.ui
 msgid "XClicker"
 msgstr "XClicker"
+
+#: src/x11api.c
+msgid "Mouse Back"
+msgstr "鼠标后退键"
+
+#: src/x11api.c
+msgid "Mouse Forward"
+msgstr "鼠标前进键"
+
+#: src/x11api.c
+msgid "Mouse Side Button"
+msgstr "鼠标侧键"

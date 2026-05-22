@@ -3,6 +3,7 @@
 #include <X11/extensions/XInput2.h>
 #include <X11/extensions/XTest.h>
 #include "x11api.h"
+#include "utils.h"
 
 #define DEFAULT_MICRO_SLEEP 1
 
@@ -145,6 +146,26 @@ char *keycode_to_string(Display *display, int keycode)
     if (keysym == NoSymbol)
         return NULL;
     return XKeysymToString(keysym);
+}
+
+const char *mouse_button_to_string(int button)
+{
+    switch (button)
+    {
+    case 8:
+        return _("Mouse Back");
+    case 9:
+        return _("Mouse Forward");
+    default:
+        if (button >= 10)
+            return _("Mouse Side Button");
+        return NULL;
+    }
+}
+
+gboolean is_valid_mouse_button(int button)
+{
+    return button >= 8;
 }
 
 Display *get_display()
