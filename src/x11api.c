@@ -30,6 +30,9 @@ void mask_config(Display *display, enum MaskFlags flags)
         XISetMask(m->mask, XI_RawButtonPress);
     }
 
+    if (flags & MASK_MOUSE_RELEASE)
+        XISetMask(m->mask, XI_ButtonRelease);
+
     m = &mask[1];
     m->deviceid = XIAllMasterDevices;
     m->mask_len = XIMaskLen(XI_LASTEVENT);

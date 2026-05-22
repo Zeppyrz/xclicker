@@ -571,6 +571,9 @@ void hotkey_type_entry_changed()
 
 	g_key_file_set_string(config_gfile, PCK_HOTKEY, raw);
 	g_key_file_save_to_file(config_gfile, configpath, NULL);
+
+	// Update in-memory config so the hotkey mode change takes effect immediately
+	config->hotkey = strcmp(raw, "Normal") == 0 ? "Normal" : "Hold";
 }
 
 void mouse_button_entry_changed()
