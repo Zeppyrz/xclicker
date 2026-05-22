@@ -616,11 +616,16 @@ void get_start_stop_key_handler()
 void set_start_stop_button_hotkey_text()
 {
 	Display *display = get_display();
+	if (!display)
+		return;
+
 	const char *start_text_1 = _("Start");
 	const char *stop_text_1 = _("Stop");
 
 	// Button2 should always be defined
 	const char *button_2_key = keycode_to_string(display, config->button2);
+	if (!button_2_key)
+		button_2_key = "?";
 
 	char *start_text;
 	char *stop_text;
@@ -629,6 +634,8 @@ void set_start_stop_button_hotkey_text()
 	if (config->button1 != -1)
 	{
 		const char *button_1_key = keycode_to_string(display, config->button1);
+		if (!button_1_key)
+			button_1_key = "?";
 		start_text = malloc(1 + strlen(start_text_1) + strlen(button_1_key) + strlen(button_2_key) + 4);
 		stop_text = malloc(1 + strlen(stop_text_1) + strlen(button_1_key) + strlen(button_2_key) + 4);
 		sprintf(start_text, "%s (%s+%s)", start_text_1, button_1_key, button_2_key);

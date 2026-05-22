@@ -53,17 +53,19 @@ void get_next_key_state(Display *display, KeyState *buffer)
 
     XGenericEventCookie *cookie = &event.xcookie;
 
-    if (XGetEventData(display, cookie) && cookie->type == GenericEvent)
+    if (XGetEventData(display, cookie))
     {
-        XIDeviceEvent *event = cookie->data;
+        if (cookie->type == GenericEvent)
+        {
+            XIDeviceEvent *event = cookie->data;
 
-        if (!(event->flags & XIKeyRepeat)) {
-            buffer->evtype = event->evtype;
-            buffer->button = event->detail;
+            if (!(event->flags & XIKeyRepeat)) {
+                buffer->evtype = event->evtype;
+                buffer->button = event->detail;
+            }
         }
+        XFreeEventData(display, cookie);
     }
-
-    XFreeEventData(display, cookie);
 }
 
 void get_cursor_coords(Display *display, int *x, int *y)
@@ -139,7 +141,10 @@ int click(Display *display, int button, int mode, int sleep)
 
 char *keycode_to_string(Display *display, int keycode)
 {
-    return XKeysymToString(XkbKeycodeToKeysym(display, keycode, 0, 0));
+    KeySym keysym = XkbKeycodeToKeysym(display, keycode, 0, 0);
+    if (keysym == NoSymbol)
+        return NULL;
+    return XKeysymToString(keysym);
 }
 
 Display *get_display()

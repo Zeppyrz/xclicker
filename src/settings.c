@@ -56,6 +56,14 @@ gboolean hotkey_finished()
 void get_hotkeys_handler()
 {
     Display *display = get_display();
+    if (!display)
+    {
+        g_printerr("Failed to open X11 display for hotkey capture\n");
+        isChoosingHotkey = FALSE;
+        g_idle_add(enable_start_button, NULL);
+        return;
+    }
+
     mask_config(display, MASK_KEYBOARD_PRESS);
 
     gboolean hasPreKey = FALSE;
@@ -65,6 +73,10 @@ void get_hotkeys_handler()
         get_next_key_state(display, &keyState);
 
         int state = keyState.button;
+
+        // Skip if no valid key was captured (evtype -1 means event parse failed)
+        if (keyState.evtype == -1 || state == 0)
+            continue;
 
         // Numlock & caps lock is incredibly buggy and causes memory leaks, pointer errors, free errors...
         if (state == XKeysymToKeycode(display, XK_Num_Lock) || state == XKeysymToKeycode(display, XK_Caps_Lock))
@@ -76,6 +88,8 @@ void get_hotkeys_handler()
             hasPreKey = TRUE;
             config->button1 = state;
             const char *key_str = keycode_to_string(display, state);
+            if (!key_str)
+                key_str = "?";
             const char *plus = " + ";
             char *text = malloc(1 + strlen(key_str) + strlen(plus));
             sprintf(text, "%s%s", key_str, plus);
@@ -88,6 +102,8 @@ void get_hotkeys_handler()
         {
             config->button2 = state;
             const char *key_str = keycode_to_string(display, state);
+            if (!key_str)
+                key_str = "?";
             struct set_buttons_entry_struct *user_data = g_malloc0(sizeof(struct set_buttons_entry_struct));
 
             if (hasPreKey == TRUE)
@@ -238,25 +254,32 @@ void settings_dialog_new()
 
     // Load hotkeys
     Display *display = get_display();
-    const char *button_2_key = keycode_to_string(display, config->button2);
-    const char *sep = " + ";
-    char *hotkeys;
-
-    if (config->button1 != -1)
+    if (display)
     {
-        const char *button_1_key = keycode_to_string(display, config->button1);
-        hotkeys = malloc(1 + strlen(sep) + strlen(button_2_key) + strlen(button_1_key));
-        sprintf(hotkeys, "%s%s%s", button_1_key, sep, button_2_key);
-    }
-    else
-    {
-        hotkeys = malloc(1 + strlen(button_2_key));
-        sprintf(hotkeys, "%s", button_2_key);
-    }
-    gtk_entry_set_text(GTK_ENTRY(items.buttons_entry), hotkeys);
+        const char *button_2_key = keycode_to_string(display, config->button2);
+        if (!button_2_key)
+            button_2_key = "?";
+        const char *sep = " + ";
+        char *hotkeys;
 
-    free(hotkeys);
-    XCloseDisplay(display);
+        if (config->button1 != -1)
+        {
+            const char *button_1_key = keycode_to_string(display, config->button1);
+            if (!button_1_key)
+                button_1_key = "?";
+            hotkeys = malloc(1 + strlen(sep) + strlen(button_2_key) + strlen(button_1_key));
+            sprintf(hotkeys, "%s%s%s", button_1_key, sep, button_2_key);
+        }
+        else
+        {
+            hotkeys = malloc(1 + strlen(button_2_key));
+            sprintf(hotkeys, "%s", button_2_key);
+        }
+        gtk_entry_set_text(GTK_ENTRY(items.buttons_entry), hotkeys);
+
+        free(hotkeys);
+        XCloseDisplay(display);
+    }
 
     // Run
     gtk_dialog_run(dialog);

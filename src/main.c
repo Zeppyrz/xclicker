@@ -119,6 +119,10 @@ static const char *get_config_language()
 
 int main(int argc, char *argv[])
 {
+    // XClicker requires X11 for input capture. Force GTK to use the X11 backend
+    // so it works correctly under Wayland sessions (via XWayland).
+    setenv("GDK_BACKEND", "x11", 0);
+
     // 1. Read saved language from config and set LANGUAGE env var
     //    This must happen BEFORE setlocale() so gettext picks it up.
     const char *saved_lang = get_config_language();
