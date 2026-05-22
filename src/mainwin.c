@@ -20,6 +20,40 @@ enum HoldTimeTypes
 	HOLDTIME_TYPE_RANDOM,
 };
 
+/**
+ * Translate localized combo-box text back to the English internal value.
+ * The config file and all internal logic use English; only the UI is localized.
+ */
+static const char *untranslate_click_type(const char *text)
+{
+	if (strcmp(text, _("Single")) == 0) return "Single";
+	if (strcmp(text, _("Double")) == 0) return "Double";
+	if (strcmp(text, _("Hold")) == 0)   return "Hold";
+	return text;
+}
+
+static const char *untranslate_mouse_button(const char *text)
+{
+	if (strcmp(text, _("Left")) == 0)   return "Left";
+	if (strcmp(text, _("Right")) == 0)  return "Right";
+	if (strcmp(text, _("Middle")) == 0) return "Middle";
+	return text;
+}
+
+static const char *untranslate_hotkey_type(const char *text)
+{
+	if (strcmp(text, _("Normal")) == 0) return "Normal";
+	if (strcmp(text, _("Hold")) == 0)   return "Hold";
+	return text;
+}
+
+static const char *untranslate_holdtime_type(const char *text)
+{
+	if (strcmp(text, _("Constant")) == 0) return "Constant";
+	if (strcmp(text, _("Random")) == 0)   return "Random";
+	return text;
+}
+
 gboolean isClicking = FALSE;
 gboolean isChoosingLocation = FALSE;
 
@@ -413,20 +447,18 @@ void start_clicked()
 	struct click_opts *data = g_malloc0(sizeof(struct click_opts));
 
 	data->sleep = sleep;
-	const gchar *mousebutton_text = gtk_entry_get_text(GTK_ENTRY(mainappwindow.mouse_entry));
-	if (strcmp(mousebutton_text, "Right") == 0)
+	if (strcmp(config->mouse_button, "Right") == 0)
 		data->button = Button3;
-	else if (strcmp(mousebutton_text, "Middle") == 0)
+	else if (strcmp(config->mouse_button, "Middle") == 0)
 		data->button = Button2;
 	else
 		data->button = Button1;
 
-	const gchar *click_type_text = gtk_entry_get_text(GTK_ENTRY(mainappwindow.click_type_entry));
-	if (strcmp(click_type_text, "Single") == 0)
+	if (strcmp(config->click_type, "Single") == 0)
 		data->click_type = CLICK_TYPE_SINGLE;
-	else if (strcmp(click_type_text, "Double") == 0)
+	else if (strcmp(config->click_type, "Double") == 0)
 		data->click_type = CLICK_TYPE_DOUBLE;
-	else if (strcmp(click_type_text, "Hold") == 0)
+	else if (strcmp(config->click_type, "Hold") == 0)
 		data->click_type = CLICK_TYPE_HOLD;
 	else
 		xapp_error(_("Getting the click type"), 1);
@@ -443,10 +475,9 @@ void start_clicked()
 	if ((data->random_interval = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mainappwindow.random_interval_check))))
 		data->random_interval_ms = get_text_to_int(mainappwindow.random_interval_entry);
 
-	const gchar *holdtime_type_text = gtk_entry_get_text(GTK_ENTRY(mainappwindow.holdtime_type_entry));
-	if (strcmp(holdtime_type_text, "Constant") == 0)
+	if (strcmp(config->holdtime_type, "Constant") == 0)
 		data->holdtime_type = HOLDTIME_TYPE_CONSTANT;
-	else if (strcmp(holdtime_type_text, "Random") == 0)
+	else if (strcmp(config->holdtime_type, "Random") == 0)
 		data->holdtime_type = HOLDTIME_TYPE_RANDOM;
 	else
 		xapp_error(_("Getting the hold time type"), 1);
@@ -511,13 +542,14 @@ void get_button_clicked()
 void click_type_entry_changed()
 {
 	const gchar *click_type_text = gtk_entry_get_text(GTK_ENTRY(mainappwindow.click_type_entry));
+	const char *raw = untranslate_click_type(click_type_text);
 	gboolean active = TRUE;
-	if (strcmp(click_type_text, "Hold") == 0)
+	if (strcmp(raw, "Hold") == 0)
 	{
 		active = FALSE;
 	}
 
-	g_key_file_set_string(config_gfile, PCK_CLICK_TYPE, click_type_text);
+	g_key_file_set_string(config_gfile, PCK_CLICK_TYPE, raw);
 	g_key_file_save_to_file(config_gfile, configpath, NULL);
 
 	gtk_widget_set_sensitive(mainappwindow.hours_entry, active);
@@ -535,22 +567,24 @@ void click_type_entry_changed()
 void hotkey_type_entry_changed()
 {
 	const gchar *hotkey_type_text = gtk_entry_get_text(GTK_ENTRY(mainappwindow.hotkey_type_entry));
+	const char *raw = untranslate_hotkey_type(hotkey_type_text);
 
-	g_key_file_set_string(config_gfile, PCK_HOTKEY, hotkey_type_text);
+	g_key_file_set_string(config_gfile, PCK_HOTKEY, raw);
 	g_key_file_save_to_file(config_gfile, configpath, NULL);
 }
 
 void mouse_button_entry_changed()
 {
 	const gchar *mouse_button_entry_text = gtk_entry_get_text(GTK_ENTRY(mainappwindow.mouse_entry));
+	const char *raw = untranslate_mouse_button(mouse_button_entry_text);
 
-	g_key_file_set_string(config_gfile, PCK_MOUSE_BUTTON, mouse_button_entry_text);
+	g_key_file_set_string(config_gfile, PCK_MOUSE_BUTTON, raw);
 	g_key_file_save_to_file(config_gfile, configpath, NULL);
 }
 
 void toggle_clicking(int evtype)
 {
-	if (strcmp(gtk_entry_get_text(GTK_ENTRY(mainappwindow.hotkey_type_entry)), "Normal"))
+	if (strcmp(config->hotkey, "Normal"))
 	{
 		if (evtype == KeyPress)
 		{
@@ -689,8 +723,9 @@ void hold_time_check_toggle(GtkToggleButton *self)
 void holdtime_type_entry_changed()
 {
 	const gchar *holdtime_type_text = gtk_entry_get_text(GTK_ENTRY(mainappwindow.holdtime_type_entry));
+	const char *raw = untranslate_holdtime_type(holdtime_type_text);
 
-	g_key_file_set_string(config_gfile, PCK_HOLD_TIME_TYPE, holdtime_type_text);
+	g_key_file_set_string(config_gfile, PCK_HOLD_TIME_TYPE, raw);
 	g_key_file_save_to_file(config_gfile, configpath, NULL);
 }
 /**
