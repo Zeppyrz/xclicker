@@ -3,6 +3,7 @@
 #include <X11/keysymdef.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <libintl.h>
 
 #include "settings.h"
 #include "x11api.h"
@@ -19,6 +20,7 @@ struct _items
     GtkWidget *start_button;
     GtkWidget *xevent_switch;
     GtkWidget *reset_preset_button;
+    GtkWidget *language_combo;
 } items;
 
 struct set_buttons_entry_struct
@@ -140,7 +142,7 @@ void start_button_pressed(GtkButton *self)
 {
     isChoosingHotkey = TRUE;
     gtk_widget_set_sensitive(GTK_WIDGET(self), FALSE);
-    gtk_entry_set_text(GTK_ENTRY(items.buttons_entry), "Press Desired Keys");
+    gtk_entry_set_text(GTK_ENTRY(items.buttons_entry), _("Press Desired Keys"));
     g_thread_new("get_hotkeys_handler", get_hotkeys_handler, NULL);
 }
 
@@ -152,6 +154,48 @@ void reset_preset_button_pressed()
 
     save_and_populate_config();
     mainappwindow_import_config();
+}
+
+static void show_restart_dialog()
+{
+    GtkWidget *dialog = gtk_message_dialog_new(
+        NULL,
+        GTK_DIALOG_MODAL,
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_NONE,
+        _("Language Changed")
+    );
+    gtk_message_dialog_format_secondary_text(
+        GTK_MESSAGE_DIALOG(dialog),
+        _("The language has been changed. Please restart XClicker for the changes to take effect.")
+    );
+    gtk_dialog_add_button(GTK_DIALOG(dialog), _("Restart Later"), GTK_RESPONSE_CANCEL);
+    gtk_dialog_add_button(GTK_DIALOG(dialog), _("Restart Now"), GTK_RESPONSE_OK);
+
+    int response = gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+
+    if (response == GTK_RESPONSE_OK)
+    {
+        restart_app();
+    }
+}
+
+void language_changed(GtkComboBoxText *combo)
+{
+    const gchar *lang = gtk_combo_box_get_active_id(GTK_COMBO_BOX(combo));
+    if (lang == NULL)
+        return;
+
+    // Only show dialog if language actually changed
+    if (config->language && strcmp(config->language, lang) == 0)
+        return;
+
+    g_key_file_set_string(config_gfile, CFGK_LANGUAGE, lang);
+    config->language = lang;
+    g_key_file_save_to_file(config_gfile, configpath, NULL);
+
+    show_restart_dialog();
 }
 
 void settings_dialog_new()
@@ -167,6 +211,7 @@ void settings_dialog_new()
     gtk_builder_add_callback_symbol(builder, "xevent_switch_changed", xevent_switch_changed);
     gtk_builder_add_callback_symbol(builder, "start_button_pressed", start_button_pressed);
     gtk_builder_add_callback_symbol(builder, "reset_preset_button_pressed", reset_preset_button_pressed);
+    gtk_builder_add_callback_symbol(builder, "language_changed", language_changed);
 
     gtk_builder_connect_signals(builder, NULL);
 
@@ -177,10 +222,19 @@ void settings_dialog_new()
     items.buttons_entry = gtk_builder_get_object(builder, "buttons_entry");
     items.start_button = gtk_builder_get_object(builder, "start_button");
     items.xevent_switch = gtk_builder_get_object(builder, "xevent_switch");
+    items.language_combo = gtk_builder_get_object(builder, "language_combo");
 
     // Load
     gtk_switch_set_active(GTK_SWITCH(gtk_builder_get_object(builder, "safe_mode_switch")), is_safemode());
     gtk_switch_set_active(GTK_SWITCH(items.xevent_switch), config->use_xevent);
+
+    // Load language options
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(items.language_combo), "en", "English");
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(items.language_combo), "zh_CN", "中文");
+    if (config->language)
+        gtk_combo_box_set_active_id(GTK_COMBO_BOX(items.language_combo), config->language);
+    else
+        gtk_combo_box_set_active_id(GTK_COMBO_BOX(items.language_combo), "en");
 
     // Load hotkeys
     Display *display = get_display();

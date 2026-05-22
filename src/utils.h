@@ -2,6 +2,11 @@
 #define __UTILS_H
 
 #include <gtk/gtk.h>
+#include <libintl.h>
+
+#ifndef _
+#define _(String) gettext(String)
+#endif
 
 /**
  * @brief Print error with custom formating
@@ -28,5 +33,10 @@ void set_window_icon(GtkWindow *window);
  * @param text The text to set in the GtkEntry widget (can be NULL).
  */
 void gtk_entry_set_text_if_not_null(GtkEntry *entry, const gchar *text);
+
+/**
+ * @brief Restart the application by spawning a new process and exiting.
+ */
+void restart_app();
 
 #endif

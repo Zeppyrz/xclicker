@@ -144,16 +144,16 @@ void click_handler(gpointer *data)
 		{
 		case CLICK_TYPE_SINGLE:
 			if (click(display, args->button, using_xevent, hold_type_ms) == FALSE)
-				xapp_error("Sending click", -1);
+				xapp_error(_("Sending click"), -1);
 			break;
 		case CLICK_TYPE_DOUBLE:
 			if (click(display, args->button, using_xevent, hold_type_ms) == FALSE)
-				xapp_error("Sending click", -1);
+				xapp_error(_("Sending click"), -1);
 
 			usleep(150000); // 150 milliseconds
 
 			if (click(display, args->button, using_xevent, hold_type_ms) == FALSE)
-				xapp_error("Sending click", -1);
+				xapp_error(_("Sending click"), -1);
 			break;
 		case CLICK_TYPE_HOLD:
 			if (is_holding == FALSE) // Don't re-send mouse_down if already successfully sent
@@ -161,7 +161,7 @@ void click_handler(gpointer *data)
 				if (mouse_event(display, args->button, using_xevent, MOUSE_EVENT_PRESS))
 					is_holding = TRUE;
 				else
-					xapp_error("Sending mouse down", -1);
+					xapp_error(_("Sending mouse down"), -1);
 			}
 			break;
 		}
@@ -189,7 +189,7 @@ void click_handler(gpointer *data)
 	if (args->click_type == CLICK_TYPE_HOLD)
 	{
 		if (mouse_event(display, args->button, config->use_xevent, MOUSE_EVENT_RELEASE) == FALSE)
-			xapp_error("Sending mouse down", -1);
+			xapp_error(_("Sending mouse down"), -1);
 	}
 
 	g_free(data);
@@ -257,12 +257,12 @@ gboolean toggle_get_active()
 	{
 	case TRUE:
 		gtk_window_set_keep_above(GTK_WINDOW(mainappwindow.pwin), TRUE);
-		gtk_button_set_label(GTK_BUTTON(mainappwindow.get_button), "Click");
+		gtk_button_set_label(GTK_BUTTON(mainappwindow.get_button), _("Click"));
 		gtk_widget_set_sensitive(mainappwindow.get_button, FALSE);
 		break;
 	case FALSE:
 		gtk_window_set_keep_above(GTK_WINDOW(mainappwindow.pwin), FALSE);
-		gtk_button_set_label(GTK_BUTTON(mainappwindow.get_button), "Get");
+		gtk_button_set_label(GTK_BUTTON(mainappwindow.get_button), _("Get"));
 		gtk_widget_set_sensitive(mainappwindow.get_button, TRUE);
 		break;
 	}
@@ -386,8 +386,8 @@ void input_changed_save_handler(GtkEditable *editable, struct _MainAppWindow *ma
 
 gboolean open_safe_mode_dialog()
 {
-	GtkDialog *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Warning");
-	gtk_message_dialog_format_secondary_text(dialog, "Intervals under 100 milliseconds is restricted because of safe mode.");
+	GtkDialog *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, _("Warning"));
+	gtk_message_dialog_format_secondary_text(dialog, _("Intervals under 100 milliseconds is restricted because of safe mode."));
 	gtk_dialog_run(dialog);
 	gtk_widget_destroy(dialog);
 	return FALSE;
@@ -429,7 +429,7 @@ void start_clicked()
 	else if (strcmp(click_type_text, "Hold") == 0)
 		data->click_type = CLICK_TYPE_HOLD;
 	else
-		xapp_error("Getting the click type", 1);
+		xapp_error(_("Getting the click type"), 1);
 
 	if ((data->repeat = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mainappwindow.repeat_only_check))))
 		data->repeat_times = get_text_to_int(mainappwindow.repeat_entry);
@@ -449,7 +449,7 @@ void start_clicked()
 	else if (strcmp(holdtime_type_text, "Random") == 0)
 		data->holdtime_type = HOLDTIME_TYPE_RANDOM;
 	else
-		xapp_error("Getting the hold time type", 1);
+		xapp_error(_("Getting the hold time type"), 1);
 
 	if ((data->hold_time = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(mainappwindow.hold_time_check))))
 		data->hold_time_ms = get_text_to_int(mainappwindow.hold_time_entry);
@@ -479,9 +479,9 @@ void mainappwindow_import_config()
 	gtk_entry_set_text_if_not_null(mainappwindow.seconds_entry, config->seconds);
 	gtk_entry_set_text_if_not_null(mainappwindow.millisecs_entry, config->millisecs);
 
-	gtk_entry_set_text_if_not_null(mainappwindow.mouse_entry, config->mouse_button);
-	gtk_entry_set_text_if_not_null(mainappwindow.click_type_entry, config->click_type);
-	gtk_entry_set_text_if_not_null(mainappwindow.hotkey_type_entry, config->hotkey);
+	gtk_entry_set_text_if_not_null(mainappwindow.mouse_entry, config->mouse_button ? _(config->mouse_button) : NULL);
+	gtk_entry_set_text_if_not_null(mainappwindow.click_type_entry, config->click_type ? _(config->click_type) : NULL);
+	gtk_entry_set_text_if_not_null(mainappwindow.hotkey_type_entry, config->hotkey ? _(config->hotkey) : NULL);
 	gtk_toggle_button_set_active(mainappwindow.repeat_only_check, config->use_repeat);
 	gtk_entry_set_text_if_not_null(mainappwindow.repeat_entry, config->repeat_times);
 
@@ -492,7 +492,7 @@ void mainappwindow_import_config()
 	gtk_entry_set_text_if_not_null(mainappwindow.random_interval_entry, config->random_interval_ms);
 	gtk_toggle_button_set_active(mainappwindow.hold_time_check, config->use_hold_time);
 	gtk_entry_set_text_if_not_null(mainappwindow.hold_time_entry, config->hold_time_ms);
-	gtk_entry_set_text_if_not_null(mainappwindow.holdtime_type_entry, config->holdtime_type);
+	gtk_entry_set_text_if_not_null(mainappwindow.holdtime_type_entry, config->holdtime_type ? _(config->holdtime_type) : NULL);
 }
 
 void settings_clicked()
@@ -616,8 +616,8 @@ void get_start_stop_key_handler()
 void set_start_stop_button_hotkey_text()
 {
 	Display *display = get_display();
-	const char *start_text_1 = "Start";
-	const char *stop_text_1 = "Stop";
+	const char *start_text_1 = _("Start");
+	const char *stop_text_1 = _("Stop");
 
 	// Button2 should always be defined
 	const char *button_2_key = keycode_to_string(display, config->button2);

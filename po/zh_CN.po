@@ -1,0 +1,212 @@
+# Chinese (Simplified) translations for xclicker package.
+msgid ""
+msgstr ""
+"Project-Id-Version: xclicker 1.5.1\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/mainwin.c
+msgid "Sending click"
+msgstr "发送点击"
+
+#: src/mainwin.c
+msgid "Sending mouse down"
+msgstr "发送鼠标按下"
+
+#: src/mainwin.c
+msgid "Click"
+msgstr "点击"
+
+#: src/mainwin.c
+msgid "Get"
+msgstr "获取"
+
+#: src/mainwin.c
+msgid "Warning"
+msgstr "警告"
+
+#: src/mainwin.c
+msgid "Intervals under 100 milliseconds is restricted because of safe mode."
+msgstr "由于安全模式，低于100毫秒的间隔已被限制。"
+
+#: src/mainwin.c
+msgid "Getting the click type"
+msgstr "获取点击类型"
+
+#: src/mainwin.c
+msgid "Getting the hold time type"
+msgstr "获取按住时间类型"
+
+#: src/mainwin.c
+msgid "Start"
+msgstr "开始"
+
+#: src/mainwin.c
+msgid "Stop"
+msgstr "停止"
+
+#: src/settings.c
+msgid "Press Desired Keys"
+msgstr "按下所需按键"
+
+#: src/settings.c
+msgid "Language Changed"
+msgstr "语言已更改"
+
+#: src/settings.c
+msgid "The language has been changed. Please restart XClicker for the changes to take effect."
+msgstr "语言已更改。请重启 XClicker 以使更改生效。"
+
+#: src/settings.c
+msgid "Restart Later"
+msgstr "稍后重启"
+
+#: src/settings.c
+msgid "Restart Now"
+msgstr "立即重启"
+
+#: src/utils.c
+msgid "Something went wrong when: '%s'. Please report errors like this.\n"
+msgstr "发生错误：'%s'。请报告此类错误。\n"
+
+#: src/config.c
+msgid "Could not find any path to get or store the settings in.\n"
+msgstr "找不到获取或存储设置的路径。\n"
+
+#: src/config.c
+msgid "The config file seems to be corrupted.\n"
+msgstr "配置文件似乎已损坏。\n"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Single"
+msgstr "单击"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Double"
+msgstr "双击"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Hold"
+msgstr "按住"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Constant"
+msgstr "固定"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Random"
+msgstr "随机"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Left"
+msgstr "左键"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Right"
+msgstr "右键"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Middle"
+msgstr "中键"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Normal"
+msgstr "普通"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Hours"
+msgstr "小时"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Minutes"
+msgstr "分钟"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Seconds"
+msgstr "秒"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Milliseconds"
+msgstr "毫秒"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Click Interval"
+msgstr "点击间隔"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Mouse Button"
+msgstr "鼠标按钮"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Click Type"
+msgstr "点击类型"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Hotkey"
+msgstr "热键"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Repeat"
+msgstr "重复"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Options"
+msgstr "选项"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Custom Location"
+msgstr "自定义位置"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Random Interval"
+msgstr "随机间隔"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Randomize the interval in milliseconds"
+msgstr "随机化间隔（毫秒）"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "More Options"
+msgstr "更多选项"
+
+#: src/resources/ui/xclicker-window.ui
+msgid "Settings"
+msgstr "设置"
+
+#: src/resources/ui/settings-dialog.ui
+msgid "Safe mode"
+msgstr "安全模式"
+
+#: src/resources/ui/settings-dialog.ui
+msgid "This prevents you from running with under a 100\nmilliseconds interval."
+msgstr "这可以防止您以低于100毫秒的间隔运行。"
+
+#: src/resources/ui/settings-dialog.ui
+msgid "Use XEvent"
+msgstr "使用 XEvent"
+
+#: src/resources/ui/settings-dialog.ui
+msgid "With this enabled, XClicker will not click on       \ngtk applications."
+msgstr "启用后，XClicker 不会点击 GTK 应用程序。"
+
+#: src/resources/ui/settings-dialog.ui
+msgid "Start/Stop Hotkey"
+msgstr "开始/停止热键"
+
+#: src/resources/ui/settings-dialog.ui
+msgid "Reset preset options"
+msgstr "重置预设选项"
+
+#: src/resources/ui/settings-dialog.ui
+msgid "Reset"
+msgstr "重置"
+
+#: src/resources/ui/settings-dialog.ui
+msgid "Language"
+msgstr "语言"
+
+#: src/resources/ui/settings-dialog.ui
+msgid "XClicker"
+msgstr "XClicker"

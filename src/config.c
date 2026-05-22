@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
+#include <libintl.h>
 #include "config.h"
 #include "x11api.h"
+#include "utils.h"
 
 const char *configpath;
 GKeyFile *config_gfile;
@@ -15,7 +17,7 @@ const char *get_config_file_path()
 
     if (!opendir(config_path))
     {
-        g_printerr("Could not find any path to get or store the settings in.\n");
+        g_printerr(_("Could not find any path to get or store the settings in.\n"));
         return NULL;
     }
 
@@ -32,7 +34,7 @@ GKeyFile *get_config_keyfile(const char *config_path)
 
     // Reversed boolean
     if (access(config_path, F_OK) == 0 && !g_key_file_load_from_file(config, config_path, G_KEY_FILE_KEEP_COMMENTS, NULL))
-        g_print("The config file seems to be corrupted.\n");
+        g_print(_("The config file seems to be corrupted.\n"));
 
     return config;
 }
@@ -94,6 +96,12 @@ struct Config *config_read_from_file()
 
     config->safe_mode_enabled = g_key_file_get_boolean(config_gfile, CFGK_SAFEMODE, NULL);
     config->use_xevent = g_key_file_get_boolean(config_gfile, CFGK_USE_XEVENT, NULL);
+
+    config->language = g_key_file_get_string(config_gfile, CFGK_LANGUAGE, NULL);
+    if (!config->language)
+    {
+        config->language = "en";
+    }
 
     config->hours = g_key_file_get_string(config_gfile, PCK_HOURS, NULL);
     config->minutes = g_key_file_get_string(config_gfile, PCK_MINUTES, NULL);

@@ -5,3 +5,4 @@ assets/saves/*.png
 assets/saves/*.jpg
 *.ui~
 *.ui#
+.cache/

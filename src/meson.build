@@ -16,4 +16,8 @@ executable('xclicker',
     'utils.c',
     xclicker_resources,
     dependencies: deps,
+    c_args: [
+        '-DGETTEXT_PACKAGE="xclicker"',
+        '-DLOCALEDIR="' + localedir + '"'
+    ]
 )

@@ -1,0 +1,7 @@
+src/main.c
+src/mainwin.c
+src/settings.c
+src/utils.c
+src/config.c
+src/resources/ui/xclicker-window.ui
+src/resources/ui/settings-dialog.ui

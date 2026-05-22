@@ -15,6 +15,7 @@ struct Config
 	int button2;
 	gboolean safe_mode_enabled;
 	gboolean use_xevent;
+	const char *language;
 
 	/// click interval
 	const char *hours;
@@ -54,6 +55,7 @@ extern struct Config *config;
 #define CFGK_BUTTON_2 CONFIG_CATEGORY_OPTIONS, "BUTTON2"
 #define CFGK_USE_XEVENT CONFIG_CATEGORY_OPTIONS, "USE_XEVENT"
 #define CFGK_SAFEMODE CONFIG_CATEGORY_OPTIONS, "SAFEMODE"
+#define CFGK_LANGUAGE CONFIG_CATEGORY_OPTIONS, "LANGUAGE"
 
 /// PCK stand for preset-category-key. Below set of defines used to prevent typos
 #define PCK_HOURS PRESET_CATEGORY_CLICK_INTERVAL, "Hours"

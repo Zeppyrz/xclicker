@@ -21,7 +21,7 @@ endif
 build:
 	@if test -d "./${DEBUG_DIR}"; then echo "Build dir is already made"; else meson ${DEBUG_DIR}; fi
 # Not "meson compile" since it doesn't work in workflow
-	ninja install -C ${DEBUG_DIR}
+	ninja -C ${DEBUG_DIR}
 
 .PHONY: run
 run:
@@ -41,7 +41,7 @@ version:
 .PHONY: release
 release: version
 	@if test -d "./${RELEASE_DIR}"; then echo "Build dir is already made"; else meson ${RELEASE_DIR} --buildtype release; fi
-	ninja install -C ${RELEASE_DIR}
+	ninja -C ${RELEASE_DIR}
 
 .PHONY: install
 install: release

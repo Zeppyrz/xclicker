@@ -14,6 +14,10 @@ add_project_arguments(
 
 
 gnome = import('gnome')
+i18n = import('i18n')
 deps = [dependency('gtk+-3.0'), dependency('x11'), dependency('xi'), dependency('xtst')]
 
+localedir = get_option('prefix') / get_option('localedir')
+
 subdir('src')
+subdir('po')
