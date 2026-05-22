@@ -7,6 +7,7 @@ base_dir="$(dirname "${BASH_SOURCE[0]}" | xargs realpath)"
 APP_ID="xclicker"
 BINARY="xclicker"
 RELEASE_BINARY="${base_dir}/build/release/src/${BINARY}"
+MO_FILE="${base_dir}/build/release/po/zh_CN/LC_MESSAGES/xclicker.mo"
 
 desktop_file="${base_dir}/assets/${APP_ID}.desktop"
 icon_file="${base_dir}/assets/icon.png"
@@ -44,6 +45,11 @@ install_app() {
     echo "Installing icon to ${share_dir}/icons/hicolor/256x256/apps/${APP_ID}.png"
     install -Dm644 "${icon_file}" "${share_dir}/icons/hicolor/256x256/apps/${APP_ID}.png"
 
+    if [ -f "${MO_FILE}" ]; then
+        echo "Installing translation to ${share_dir}/locale/zh_CN/LC_MESSAGES/xclicker.mo"
+        install -Dm644 "${MO_FILE}" "${share_dir}/locale/zh_CN/LC_MESSAGES/xclicker.mo"
+    fi
+
     echo "Updating desktop database"
     if command -v xdg-desktop-menu &>/dev/null; then
         xdg-desktop-menu forceupdate
@@ -62,6 +68,9 @@ uninstall_app() {
 
     echo "Removing icon from ${share_dir}/icons/hicolor/256x256/apps/${APP_ID}.png"
     rm -f "${share_dir}/icons/hicolor/256x256/apps/${APP_ID}.png"
+
+    echo "Removing translation from ${share_dir}/locale/zh_CN/LC_MESSAGES/xclicker.mo"
+    rm -f "${share_dir}/locale/zh_CN/LC_MESSAGES/xclicker.mo"
 
     echo "Updating desktop database"
     if command -v xdg-desktop-menu &>/dev/null; then

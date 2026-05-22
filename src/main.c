@@ -43,6 +43,46 @@ static const char *get_local_locale_dir()
 }
 
 /**
+ * Search common system locale directories for installed .mo files.
+ * Returns the locale base dir (e.g. /usr/share/locale) if found, NULL otherwise.
+ */
+static const char *find_system_locale_dir()
+{
+    static char found_dir[PATH_MAX];
+    static char mo_path[PATH_MAX];
+
+    const char *paths[] = {
+        "/usr/share/locale",
+        "/usr/local/share/locale",
+        NULL
+    };
+
+    for (int i = 0; paths[i]; i++)
+    {
+        snprintf(mo_path, sizeof(mo_path), "%s/zh_CN/LC_MESSAGES/xclicker.mo", paths[i]);
+        if (access(mo_path, F_OK) == 0)
+        {
+            g_strlcpy(found_dir, paths[i], sizeof(found_dir));
+            return found_dir;
+        }
+    }
+
+    // Check ~/.local/share/locale
+    const char *home = getenv("HOME");
+    if (home)
+    {
+        snprintf(mo_path, sizeof(mo_path), "%s/.local/share/locale/zh_CN/LC_MESSAGES/xclicker.mo", home);
+        if (access(mo_path, F_OK) == 0)
+        {
+            snprintf(found_dir, sizeof(found_dir), "%s/.local/share/locale", home);
+            return found_dir;
+        }
+    }
+
+    return NULL;
+}
+
+/**
  * Read language setting directly from config file before locale init.
  * Returns a static string — do not free.
  */
@@ -87,7 +127,10 @@ int main(int argc, char *argv[])
     // 2. Initialize locale (uses LANGUAGE env var)
     setlocale(LC_ALL, "");
 
+    // 3. Find locale directory: local build dir first, then system paths
     const char *locale_dir = get_local_locale_dir();
+    if (!locale_dir)
+        locale_dir = find_system_locale_dir();
     if (locale_dir)
         bindtextdomain(GETTEXT_PACKAGE, locale_dir);
     else
