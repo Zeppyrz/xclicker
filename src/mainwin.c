@@ -550,6 +550,7 @@ void click_type_entry_changed()
 	}
 
 	g_key_file_set_string(config_gfile, PCK_CLICK_TYPE, raw);
+	config->click_type = raw;
 	g_key_file_save_to_file(config_gfile, configpath, NULL);
 
 	gtk_widget_set_sensitive(mainappwindow.hours_entry, active);
@@ -582,6 +583,7 @@ void mouse_button_entry_changed()
 	const char *raw = untranslate_mouse_button(mouse_button_entry_text);
 
 	g_key_file_set_string(config_gfile, PCK_MOUSE_BUTTON, raw);
+	config->mouse_button = raw;
 	g_key_file_save_to_file(config_gfile, configpath, NULL);
 }
 
@@ -759,6 +761,7 @@ void holdtime_type_entry_changed()
 	const char *raw = untranslate_holdtime_type(holdtime_type_text);
 
 	g_key_file_set_string(config_gfile, PCK_HOLD_TIME_TYPE, raw);
+	config->holdtime_type = raw;
 	g_key_file_save_to_file(config_gfile, configpath, NULL);
 }
 /**
